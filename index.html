@@ -1127,6 +1127,9 @@
   </footer>
 
   <script>
+    // Backend URL
+    const BACKEND_URL = 'https://cofrix-backend-production.up.railway.app';
+
     // Scroll reveal
     const reveals = document.querySelectorAll('.reveal');
     const obs = new IntersectionObserver(entries => {
@@ -1134,11 +1137,13 @@
     }, { threshold: 0.1 });
     reveals.forEach(r => obs.observe(r));
 
-    // Form submit
-    function handleSubmit(inputId, successId, noteId) {
+    // Form submit com backend Railway
+    async function handleSubmit(inputId, successId, noteId) {
       const input = document.getElementById(inputId);
       const success = document.getElementById(successId);
       const note = document.getElementById(noteId);
+      const btn = input.nextElementSibling;
+
       if (!input.value || !input.value.includes('@')) {
         input.style.borderColor = '#c94a4a';
         input.placeholder = 'Digite um e-mail válido';
@@ -1148,8 +1153,19 @@
         }, 2000);
         return;
       }
+
+      if(btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+
+      try {
+        await fetch(BACKEND_URL + '/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: input.value })
+        });
+      } catch (err) {}
+
       input.style.display = 'none';
-      if(input.nextElementSibling) input.nextElementSibling.style.display = 'none';
+      if(btn) btn.style.display = 'none';
       if(note) note.style.display = 'none';
       success.style.display = 'flex';
     }
